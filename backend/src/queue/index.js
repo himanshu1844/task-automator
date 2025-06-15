@@ -1,12 +1,12 @@
 import { Queue } from 'bullmq';
 
-const myQueue = new Queue('try');
+const stepQueue = new Queue('step');
 
 async function addJobs() {
-  await myQueue.add("execute app 1",{action:"tweet",body:"Hello World1!"});
-  await myQueue.add("execute app 1",{action:"tweet",body:"Hello World2!"});
+  await stepQueue.add("execute app 1",{action:"tweet",body:"Hello World1!"});
+  await stepQueue.add("execute app 1",{action:"tweet",body:"Hello World2!"});
   console.log("Jobs added to the queue");
   
 }
 
-await addJobs();
+export default stepQueue;

@@ -1,28 +1,31 @@
 import { Worker } from 'bullmq';
 import IORedis from 'ioredis';
+import runGmailStep from './apps/gmail/actions/send_mail/index.js';
+
 
 const connection = new IORedis({ maxRetriesPerRequest: null });
 
-const action = async () => {
-  // Simulate some asynchronous work
-  return new Promise(resolve => {
-    setTimeout(() => {
-      console.log('Action completed');
-      resolve();
-    }, 1000);
-  });
-
-}
 const worker = new Worker(
-  'try',
-  async job => {
-    
-    console.log(`message received id: ${job.id}`);
-    console.log(`message received name: ${job.name}`);
-    console.log(`message received data: ${JSON.stringify(job.data)}`);
-    
-   await action();
+  'step',
+  async (job) => {
+    const { stepId, flowId, type, config, authTokenId, serviceId } = job.data;
 
+    console.log(`Processing step ${stepId} of type ${type}`);
+
+    try {
+      switch (type) {
+        case 'gmail':
+          await runGmailStep({ stepId, flowId, config, authTokenId });
+          break;
+       
+      }
+
+      console.log(`Step ${stepId} processed successfully.`);
+      return { success: true };
+    } catch (error) {
+      console.error(`Error processing step ${stepId}:`, error);
+      throw error; // This marks the job as failed
+    }
   },
-  { connection },
+  { connection }
 );
